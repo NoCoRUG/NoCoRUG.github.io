@@ -4,9 +4,7 @@ title: "R markdown, R notebooks, and some basic stats"
 date: 2018-06-20
 ---
 
-## In R group today we're going to begin by learning about [R markdwon](https://rmarkdown.rstudio.com/) and how we can use it, along with 
+## In R group today we're going to begin by learning about [R markdown](https://rmarkdown.rstudio.com/) and how we can use it, along with 
 [R Notebooks](https://rmarkdown.rstudio.com/r_notebooks.html) to document our work in R in a user-friendly way.
 
-We'll practice with some data about trees collected by students in the Fall 2017 Forest Ecology class at St. Lawrence University.
 
-[Markdown] is a 
