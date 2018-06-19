@@ -1,0 +1,83 @@
+---
+title: "R Notebooks and R Markdown"
+author: "NoCoRUG"
+date: "June 20, 2018"
+output: html_notebook
+---
+## Overview
+
+Today we'll take a quick look at using R Markdown inside of R Notebooks as a way of documenting work.
+
+## Markdown, R Markdown, and R Notebooks
+
+[Markdown](https://daringfireball.net/projects/markdown/) is "...a text-to-html conversion tool for web writers." [R Markdown](http://rmarkdown.rstudio.com) is a tool for using Markdown alongisde of R to combine narrative text about an analysis with the code for the analysis in order to make document the work and make it reproducable.
+
+
+R Notebooks and R Markdown have several advantages:
+
+* [Literate programming](http://literateprogramming.com/) allows you to document your work in a way that you (later) or others (now or later) can easily understand.
+* Notebooks enable you to use `#commenting` to comment your code and text to narrate your analysis.
+* Your end result is easily sharable.
+
+## Let's give it a try
+
+### About the data
+We'll use some data about trees collected by my Forest Ecology students in Fall 2017.  The data are available on our [github website](https://github.com/NoCoRUG/Datasets/blob/master/trees.csv).  
+
+
+### Writing code chunks
+
+The code chunk below loads a package to deal with **https** and reads the data directly from github.
+
+```{r}
+library(RCurl) #turns on Rcurl library (which must be installed) to deal w/https
+trees <-read.csv(text = getURL("https://raw.githubusercontent.com/NoCoRUG/Datasets/master/trees.csv"))
+
+```
+A cool think about R Notebooks is that you can run code and create plots right inside
+of your document.
+
+Let's add some code to take a look at our data set:
+```{r}
+head(trees)
+```
+And now let's figure out the average dbh across species:
+```{r}
+summary(trees$DBH)
+meanDBH<-mean(trees$DBH)
+meanDBH
+```
+We could also make a quick plot:
+
+```{r}
+library(ggplot2)
+ggplot(trees, aes(x = Type, y = DBH, color = Type))+
+   geom_boxplot()
+```
+
+
+### Formatting text
+We can format text in a variety of ways using Markdown.  R Studio provides [R Markdown Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf) that can also be accessed from the R studio Help dropdown menu:
+ 
+
+
+We can also do things like:
+
+   * Bullet lists
+    + with sublists
+    
+We can include **bold** items and blockquotes:
+
+> Isn't it fun to learn about R Notebooks?
+
+We can also print inline code such as `read.csv` if we want to. 
+
+We can print ~subscripted~ and ^superscripted^ text or numbers. 
+
+And much...much...more!
+
+
+## Resources to learn more
+The folks at RStudio produce a [R Markdown Cheat Sheet](https://www.rstudio.com/wp-content/uploads/2016/03/rmarkdown-cheatsheet-2.0.pdf)
+
+[This article](https://support.rstudio.com/hc/en-us/articles/205368677-R-Markdown-Dynamic-Documents-for-R) from the R Studio support pages has a number of other good links.
