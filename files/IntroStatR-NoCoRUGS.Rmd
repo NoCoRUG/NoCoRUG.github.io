@@ -1,0 +1,174 @@
+---
+title: "Intro Stat in R"
+author: "No Co R Users Group"
+date: "June 18, 2018"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<!-- You will not be able to see this text. (i.e., this is an HTML comment) for R code use # -->
+
+<!-- The following is just simple CSS formatting for two column tables -->
+<style>
+  .col2 {
+    columns: 2 200px;         /* number of columns and width in pixels*/
+    -webkit-columns: 2 200px; /* chrome, safari */
+    -moz-columns: 2 200px;    /* firefox */
+  }
+  .col3 {
+    columns: 3 100px;
+    -webkit-columns: 3 100px;
+    -moz-columns: 3 100px;
+  }
+</style>
+
+
+## Overview
+In this lab we will learn how to retrieve basic summary statistics and statistical inference from R.
+
+## About the data
+We will be using data from the "first day survey" that is administered to Stat 113 (i.e., Intro Stat) students on the first of class. (For privacy reasons, I am using data from several semesters ago...and not telling you which semester it is from!) It is available to download at: [http://myslu.stlawu.edu/~iramler/stat201/datasets/stat113.csv](http://myslu.stlawu.edu/~iramler/stat201/datasets/stat113.csv)
+ 
+
+<div class="col2">
+- `Year`: Class Year (of Student)
+- `Gender`: Binary Gender
+- `Hgt`: Height in inches
+- `Wgt`: Weight in pounds
+- `Smoke`: Smoking status
+- `Hand`: Handedness
+- `Sibs`: Number of Siblings
+- `Birth`: Birth order (1 if only child)
+- `MathSAT`: Math SAT score
+- `VerbalSAT`: Verbal SAT score
+- `GPA`: GPA (left blank for Fall semester first year students)
+- `Exercise`: Hours per week
+- `Greek`: Greek house status
+- `Sport`: On a sports team?
+- `TV`: Typical number of hours of TV (including online streaming) watched per week
+- `Random`: A "randomly" chosen 4 digit number
+- `Award`: Preferred Award
+- `Pulse`: Pulse rate (beats per minute)
+- `Pierces`: Number of piercings
+- `Facebook`: (Approximate) Number of Facebook friends
+- `Tattoo`: Tattoo?
+- `Twitter`: Twitter user?
+- `Computer`: Computer Operating System
+- `SocialMedia`: Favorite social media platform
+- `Class`: Section identifier
+
+</div>
+
+
+### Create a project
+The first step in any new analysis that you do should be to create a project. If you haven't already done so, do it now. (Recall that you can both create a project in a new directory or by linking a project to an existing directory that already contains data, code, etc.)
+
+
+### Load packages
+
+The second step in most analyses is to load packages that you intend to use. Often, I will add extra lines to this R chunk as I build a file. Let's start by loading the readr package. (readr, part of the Tidyverse, is a useful package for loading in well-structured data. It is also what the "Import Dataset" option uses.)
+
+```{r load-packages, message=FALSE}
+library(readr)
+# add more packages here as you need them
+```
+
+
+### Read in Data
+The next step is to read in the data. (I recommend writing out the code instead of using the Import Dataset option. This helps improve reproduciblity of your code/markdown file as the Import Dataset option does not use local paths.)
+
+```{r, eval = T, echo = T}
+
+stat113 <- read_csv("data/stat113.csv")
+
+```
+
+
+### Understand the Data's Structure
+After reading data, you often want to View() and/or glimpse() the data. (You'll likely want to make a few plots too, but that is for another day.)
+
+```{r}
+# note, don't leave a View() function active in a markdown file, 
+# it won't compile correctly if you do.
+
+dplyr::glimpse(stat113) # requires dplyr package
+
+```
+
+### Descriptive statistics
+
++ via summary()
+
+```{r}
+summary(stat113)
+```
+
+
++ investigating individual variables
+
+```{r}
+mean(stat113$Hgt)
+mean(stat113$GPA)
+table(stat113$SocialMedia)
+```
+
+
++ Correlation/Assocations
+
+
+```{r}
+#cor(stat113)
+numericVars <- which( sapply(stat113, class) != "character")
+round( cor(stat113[,numericVars], use = "p"), 2)
+corrplot::corrplot(cor(stat113[,numericVars], use = "p"))
+
+table(stat113$Sport, stat113$Award)
+
+```
+
+
++ Any requests?
+
+
+### Simple inference
+**Disclaimer: I did not check the validility of the assumptions for normal-theory based inference.**
+
++ Construct a 95% confidence interval for the mean GPA of Stat 113 students. Also, test if the mean GPA is higher than 3.0
+
+```{r}
+t.test(x = stat113$GPA, mu = 3, alternative = "greater")
+```
+
+
++ Conduct a two-sample t-test comparing the Pulse rate for athletes vs non-athletes.
+
+```{r}
+t.test(Pulse ~ Sport, data = stat113)
+```
+
+
++ Is there a relationship between choice of award and tattoo status?
+
+```{r}
+AwardVsTattoo <- chisq.test(stat113$Tattoo, stat113$Award)
+AwardVsTattoo
+```
+
+
++ Is there a significant linear relationship between Math SAT scores and GPA?
+
+```{r}
+lmodGPA_on_MathSAT <- lm(GPA ~ MathSAT, data = stat113)
+lmodGPA_on_MathSAT
+summary(lmodGPA_on_MathSAT)
+
+```
+
+
+
++ Any other requests?
+
+
