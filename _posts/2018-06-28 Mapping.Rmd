@@ -1,0 +1,114 @@
+---
+title: "Mapping chytridiomycosis sightings in Australia"
+output:
+  html_notebook: default
+  html_document: default
+  pdf_document: default
+---
+####1. What is chytridiomycosis?
+Chytridiomycosis is a fungal infection that causes disease in amphibians, threatening populations that are already at risk of extinction. The disease can be controlled by reducing global shipping of amphibians, particularly from areas where the fungal infection is found. The pet trade is a major vector of this disease (you can read about it here, if you are interested: http://science.sciencemag.org/content/360/6389/604), putting hot spots amphibian biodiversity at risk. So, a good way to get started at prevention is to learn which areas of the world fungal infection has been observed. 
+
+Today, we are going to map out some locations in Australia where one species of this pathogenic fungus has been found. We will be using the "ggmap" package to do this today, but there actually several ways to map in R.
+
+####2. Downloading and installing necessary packages for today:
+```{r}
+#Do you have all the packages you need?
+require("ggplot2")
+require("ggmap")
+require("data.table")
+require("dplyr")
+```
+####3. Getting the data.
+We are going to use a dataset from Murray et al (2010). (Full citation: Murray, K., et al. 2010. The distribution and host range of the pandemic disease chytridiomycosis in Australia, spanning surveys from 1956-2007. Ecology 91: 1557).
+Let's get the data!
+```{r}
+chytrid<-fread('http://www.esapubs.org/archive/ecol/E091/108/Chytridiomycosis_data_1956_2007.txt')
+View(chytrid)
+str(chytrid)
+```
+####4. Refining the data.
+You will notice that there are some results on this HUGE dataset whose accuracy is "unacceptable". Let's remove those from our map data.
+```{r}
+acceptable<-filter(chytrid, Accuracy=="acceptable")
+View(acceptable)
+#Check the number observations in your data above to see how many results were deemed unacceptable!
+```
+
+This is still a HUGE dataset. Let's focus on one particular year. How about the most recent year in the study, 2007? Try filtering your data as you did above for just data in the year 2007.
+```{r}
+acceptable07<-filter(acceptable, Year=="2007")
+View(acceptable07)
+```
+That's much better, right? 337 observations from 7423 means we shrunk our data down quite a bit. Now, one more thing. Maybe we are interested in just locations where diseased salamanders were found; these would be rows where "Disease_status" is "positive". Narrow down your data one more time...
+```{r}
+positive07<-filter(acceptable07, Disease_status =="positive")
+View(positive07)
+```
+
+####5. Fetching a map from Google.
+Okay, now that we have the data we wish to map, what are you waiting for? Let's map it! :)
+
+```{r}
+location<-"Australia"
+aus.map<-get_map(location=location, source="google", maptype = "terrain", zoom=4)
+ggmap(aus.map)
+#If you get an error that says "geocode failed with status OVER_QUERY_LIMIT, location = "Australia", just rerun the chunk until it works!
+```
+####6. Adding points.
+Now you have a map of Australia, but how do you get the points on it? Well, the syntax for ggmap is similar to that of ggplot...
+
+```{r}
+#Adding points to map...
+ggmap(aus.map) +
+  geom_point(aes(x=Longitude, y=Latitude), data=positive07)
+```
+What can we learn about our observations? In 2007, chytridiomycosis is limited to eastern Australia. 
+
+####7. Examining chytridiomycosis by year.
+What if we wanted to examine the appearance of the disease by year...how could we do that?
+```{r}
+#Get positive data for all years
+positive<-filter(acceptable, Disease_status=="positive")
+View(positive)
+```
+
+
+```{r}
+
+#Map data, with different years represented by different color points
+ggmap(aus.map) +
+  geom_point(aes(x=Longitude, y=Latitude, color=Year), data=positive)
+```
+Hmm, that doesn't look right! Since years are numbers ("integers" in R's view), ggmap automatically turns them into continuous variables. Let's make a quick change to our dataset to fix that!
+
+```{r}
+positive$Year<-as.character(positive$Year)
+```
+
+Map it again!
+```{r}
+ggmap(aus.map) +
+  geom_point(aes(x=Longitude, y=Latitude, color=Year), data=positive)
+```
+
+That's better! But there is one little issue here, can you see what it is?
+```{r}
+#removing non-year from data
+positive<-filter(positive, Year!="-9999")
+```
+
+```{r}
+ggmap(aus.map) +
+  geom_point(aes(x=Longitude, y=Latitude, color=Year), data=positive)
+```
+
+####8. Saving your map.
+Now, what if you wanted to save your map? Try this:
+
+```{r}
+#saving and exporting map
+ggsave("auschytrid.png")
+```
+
+
+
